@@ -23,7 +23,7 @@ const initialState: NewsState = {
 }
 
 // API configuration
-// const RAPID_API_KEY = '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46';
+const RAPID_API_KEY = '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46';
 const RAPID_API_HOST = 'cryptocurrency-news2.p.rapidapi.com';
 
 export const fetchNewsData = createAsyncThunk("news/fetchNewsData", async () => {
