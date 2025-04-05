@@ -35,7 +35,7 @@ const initialState: WeatherState = {
   error: null,
 }
 
-// const RAPID_API_KEY = '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46';
+const RAPID_API_KEY = '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46';
 const RAPID_API_HOST = 'yahoo-weather5.p.rapidapi.com';
 
 const cities = ['New York', 'London', 'Tokyo', 'Sydney', 'Paris', 'Dubai'];
