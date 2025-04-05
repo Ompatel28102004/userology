@@ -3,17 +3,16 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "@/redux/store"
-import { fetchCryptoData, toggleFavoriteCrypto } from "@/redux/features/cryptoSlice"
+import { fetchCryptoData } from "@/redux/features/cryptoSlice"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, TrendingDown, TrendingUp } from "lucide-react"
+import { TrendingDown, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function CryptoSection() {
   const dispatch = useDispatch<AppDispatch>()
   const { cryptos, loading, error } = useSelector((state: RootState) => state.crypto)
-  const favoriteCryptos = useSelector((state: RootState) => state.crypto.favorites)
 
   useEffect(() => {
     dispatch(fetchCryptoData())
@@ -25,10 +24,6 @@ export function CryptoSection() {
 
     return () => clearInterval(interval)
   }, [dispatch])
-
-  const handleToggleFavorite = (cryptoId: string) => {
-    dispatch(toggleFavoriteCrypto(cryptoId))
-  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -98,23 +93,9 @@ export function CryptoSection() {
             {cryptos.map((crypto) => (
               <div key={crypto.id} className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <Link href={`/crypto/${crypto.id}`} className="font-medium hover:underline">
-                      {crypto.name} ({crypto.symbol.toUpperCase()})
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleToggleFavorite(crypto.id)}
-                    >
-                      <Star
-                        className={`h-4 w-4 ${
-                          favoriteCryptos.includes(crypto.id) ? "fill-yellow-400 text-yellow-400" : ""
-                        }`}
-                      />
-                    </Button>
-                  </div>
+                  <Link href={`/crypto/${crypto.id}`} className="font-medium hover:underline">
+                    {crypto.name} ({crypto.symbol.toUpperCase()})
+                  </Link>
                   <div className="text-sm text-muted-foreground">Market Cap: {formatMarketCap(crypto.marketCap)}</div>
                 </div>
                 <div>
@@ -140,4 +121,3 @@ export function CryptoSection() {
     </Card>
   )
 }
-

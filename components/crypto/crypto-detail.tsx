@@ -1,15 +1,16 @@
 "use client"
 
 import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import type { AppDispatch, RootState } from "@/redux/store"
-import { fetchCryptoData, toggleFavoriteCrypto } from "@/redux/features/cryptoSlice"
+import { useDispatch } from "react-redux"
+import { type AppDispatch, useAppSelector } from "@/redux/store"
+import { fetchCryptoData } from "@/redux/features/cryptoSlice"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Star, TrendingDown, TrendingUp, DollarSign, BarChart3, Activity } from "lucide-react"
+import { ArrowLeft, TrendingDown, TrendingUp, DollarSign, BarChart3, Activity } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CryptoChart } from "@/components/crypto/crypto-chart"
+import { FavoriteButton } from "@/components/favorites/favorite-button"
 
 interface CryptoDetailProps {
   cryptoId: string
@@ -17,8 +18,7 @@ interface CryptoDetailProps {
 
 export function CryptoDetail({ cryptoId }: CryptoDetailProps) {
   const dispatch = useDispatch<AppDispatch>()
-  const { cryptos, loading, error } = useSelector((state: RootState) => state.crypto)
-  const favoriteCryptos = useSelector((state: RootState) => state.crypto.favorites)
+  const { cryptos, loading, error } = useAppSelector((state) => state.crypto)
 
   const crypto = cryptos.find((c) => c.id === cryptoId)
 
@@ -27,10 +27,6 @@ export function CryptoDetail({ cryptoId }: CryptoDetailProps) {
       dispatch(fetchCryptoData())
     }
   }, [dispatch, crypto, cryptoId])
-
-  const handleToggleFavorite = () => {
-    dispatch(toggleFavoriteCrypto(cryptoId))
-  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -117,10 +113,7 @@ export function CryptoDetail({ cryptoId }: CryptoDetailProps) {
             {crypto.name} <span className="text-muted-foreground">({crypto.symbol.toUpperCase()})</span>
           </h1>
         </div>
-        <Button variant="outline" size="sm" onClick={handleToggleFavorite} className="flex items-center gap-2">
-          <Star className={`h-4 w-4 ${favoriteCryptos.includes(cryptoId) ? "fill-yellow-400 text-yellow-400" : ""}`} />
-          {favoriteCryptos.includes(cryptoId) ? "Remove from Favorites" : "Add to Favorites"}
-        </Button>
+        <FavoriteButton id={cryptoId} type="crypto" name={crypto.name} />
       </div>
 
       <Card>

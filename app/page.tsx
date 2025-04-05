@@ -1,4 +1,4 @@
-import { DashboardHeader } from "../components/dashboard/dashboard-header"
+import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { WeatherSection } from "@/components/dashboard/weather-section"
 import { CryptoSection } from "@/components/dashboard/crypto-section"
 import { NewsSection } from "@/components/dashboard/news-section"

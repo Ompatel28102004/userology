@@ -1,15 +1,16 @@
 "use client"
 
 import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import type { AppDispatch, RootState } from "@/redux/store"
-import { fetchWeatherData, toggleFavoriteCity } from "@/redux/features/weatherSlice"
+import { useDispatch } from "react-redux"
+import { type AppDispatch, useAppSelector } from "@/redux/store"
+import { fetchWeatherData } from "@/redux/features/weatherSlice"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Star, Droplets, Thermometer, Wind, Sun } from "lucide-react"
+import { ArrowLeft, Droplets, Thermometer, Wind, Sun } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { WeatherChart } from "@/components/weather/weather-chart"
+import { FavoriteButton } from "@/components/favorites/favorite-button"
 
 interface WeatherDetailProps {
   cityId: string
@@ -17,8 +18,7 @@ interface WeatherDetailProps {
 
 export function WeatherDetail({ cityId }: WeatherDetailProps) {
   const dispatch = useDispatch<AppDispatch>()
-  const { cities, loading, error } = useSelector((state: RootState) => state.weather)
-  const favoriteCities = useSelector((state: RootState) => state.weather.favorites)
+  const { cities, loading, error } = useAppSelector((state) => state.weather)
 
   const city = cities.find((c) => c.id === cityId)
 
@@ -27,10 +27,6 @@ export function WeatherDetail({ cityId }: WeatherDetailProps) {
       dispatch(fetchWeatherData())
     }
   }, [dispatch, city, cityId])
-
-  const handleToggleFavorite = () => {
-    dispatch(toggleFavoriteCity(cityId))
-  }
 
   if (loading === "failed") {
     return (
@@ -94,10 +90,7 @@ export function WeatherDetail({ cityId }: WeatherDetailProps) {
           </Link>
           <h1 className="text-3xl font-bold">{city.name}</h1>
         </div>
-        <Button variant="outline" size="sm" onClick={handleToggleFavorite} className="flex items-center gap-2">
-          <Star className={`h-4 w-4 ${favoriteCities.includes(cityId) ? "fill-yellow-400 text-yellow-400" : ""}`} />
-          {favoriteCities.includes(cityId) ? "Remove from Favorites" : "Add to Favorites"}
-        </Button>
+        <FavoriteButton id={cityId} type="weather" name={city.name} />
       </div>
 
       <Card>

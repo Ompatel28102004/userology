@@ -1,27 +1,24 @@
 "use client"
 
-import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import type { AppDispatch, RootState } from "@/redux/store"
-import { fetchWeatherData, toggleFavoriteCity } from "@/redux/features/weatherSlice"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, Droplets, Thermometer, Wind } from "lucide-react"
+
+import { useEffect } from "react"
+import { useDispatch } from "react-redux"
+import { type AppDispatch, useAppSelector } from "@/redux/store"
+import { fetchWeatherData } from "@/redux/features/weatherSlice"
+import { Card, CardContent } from "@/components/ui/card"
+import { Droplets, Thermometer, Wind } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
+import { FavoriteButton } from "@/components/favorites/favorite-button"
 
 export function WeatherList() {
   const dispatch = useDispatch<AppDispatch>()
-  const { cities, loading, error } = useSelector((state: RootState) => state.weather)
-  const favoriteCities = useSelector((state: RootState) => state.weather.favorites)
+  const { cities, loading, error } = useAppSelector((state) => state.weather)
 
   useEffect(() => {
     dispatch(fetchWeatherData())
   }, [dispatch])
-
-  const handleToggleFavorite = (cityId: string) => {
-    dispatch(toggleFavoriteCity(cityId))
-  }
 
   if (loading === "failed") {
     return (
@@ -65,13 +62,7 @@ export function WeatherList() {
                     <Link href={`/weather/${city.id}`}>
                       <h3 className="text-2xl font-bold hover:underline">{city.name}</h3>
                     </Link>
-                    <Button variant="ghost" size="icon" onClick={() => handleToggleFavorite(city.id)}>
-                      <Star
-                        className={`h-5 w-5 ${
-                          favoriteCities.includes(city.id) ? "fill-yellow-400 text-yellow-400" : ""
-                        }`}
-                      />
-                    </Button>
+                    <FavoriteButton id={city.id} type="weather" name={city.name} showText={false} />
                   </div>
                   <div className="text-4xl font-bold mb-6">{city.weather.temp}°C</div>
                   <div className="text-lg mb-4">{city.weather.main}</div>

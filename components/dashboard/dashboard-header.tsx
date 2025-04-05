@@ -1,29 +1,41 @@
 "use client"
 
 import Link from "next/link"
-import { Bell, Wifi, WifiOff } from "lucide-react"
+import { Bell, Wifi, WifiOff, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/redux/store"
 import { NotificationDropdown } from "@/components/notification-dropdown"
 import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export function DashboardHeader() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [wsConnected, setWsConnected] = useState(false)
-  const notifications = useSelector((state: RootState) => state.notifications.items)
-  const unreadCount = notifications.filter((n) => !n.read).length
 
-  // Check WebSocket connection status
+  let notifications: any[] = []
+  let unreadCount = 0
+
+  try {
+    const reduxState = useSelector((state: RootState) => state.notifications)
+    notifications = reduxState.items
+    unreadCount = notifications.filter((n) => !n.read).length
+  } catch (error) {
+    console.error("Redux not available:", error)
+    notifications = []
+    unreadCount = 0
+  }
+
   useEffect(() => {
-    // This is a simple way to check if the WebSocket is connected
-    // In a real app, you would use a more robust method or state from Redux
     const checkConnection = () => {
-      // For demo purposes, we'll just randomly set the connection status
-      // In a real app, this would come from your WebSocket provider state
-      const isConnected = localStorage.getItem("wsConnected") === "true"
-      setWsConnected(isConnected)
+      try {
+        const isConnected = localStorage.getItem("wsConnected") === "true"
+        setWsConnected(isConnected)
+      } catch (error) {
+        console.error("Error checking WebSocket connection:", error)
+        setWsConnected(false)
+      }
     }
 
     checkConnection()
@@ -33,21 +45,33 @@ export function DashboardHeader() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6 md:gap-10">
+        <div className="flex items-center gap-4 md:gap-10">
+          {/* Mobile Menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-4">
+              <nav className="flex flex-col gap-4">
+                <Link href="/" className="text-lg font-medium hover:text-primary">Dashboard</Link>
+                <Link href="/favorites" className="text-lg font-medium hover:text-primary">Favorites</Link>
+              </nav>
+            </SheetContent>
+          </Sheet>
+
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-xl">CryptoWeather</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
-              Dashboard
-            </Link>
-            <Link href="/favorites" className="text-sm font-medium transition-colors hover:text-primary">
-              Favorites
-            </Link>
+            <Link href="/" className="text-sm font-medium hover:text-primary">Dashboard</Link>
+            <Link href="/favorites" className="text-sm font-medium hover:text-primary">Favorites</Link>
           </nav>
         </div>
+
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center">
             {wsConnected ? (
@@ -62,6 +86,7 @@ export function DashboardHeader() {
               </Badge>
             )}
           </div>
+          
           <div className="relative">
             <Button
               variant="ghost"
@@ -76,11 +101,14 @@ export function DashboardHeader() {
                 </span>
               )}
             </Button>
-            {showNotifications && <NotificationDropdown onClose={() => setShowNotifications(false)} />}
+            {showNotifications && (
+              <div className="">
+                <NotificationDropdown onClose={() => setShowNotifications(false)} />
+              </div>
+            )}
           </div>
         </div>
       </div>
     </header>
   )
 }
-

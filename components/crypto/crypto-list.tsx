@@ -1,27 +1,23 @@
 "use client"
 
 import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import type { AppDispatch, RootState } from "@/redux/store"
-import { fetchCryptoData, toggleFavoriteCrypto } from "@/redux/features/cryptoSlice"
+import { useDispatch } from "react-redux"
+import { type AppDispatch, useAppSelector } from "@/redux/store"
+import { fetchCryptoData } from "@/redux/features/cryptoSlice"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, TrendingDown, TrendingUp } from "lucide-react"
+import { TrendingDown, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
+import { FavoriteButton } from "@/components/favorites/favorite-button"
 
 export function CryptoList() {
   const dispatch = useDispatch<AppDispatch>()
-  const { cryptos, loading, error } = useSelector((state: RootState) => state.crypto)
-  const favoriteCryptos = useSelector((state: RootState) => state.crypto.favorites)
+  const { cryptos, loading, error } = useAppSelector((state) => state.crypto)
 
   useEffect(() => {
     dispatch(fetchCryptoData())
   }, [dispatch])
-
-  const handleToggleFavorite = (cryptoId: string) => {
-    dispatch(toggleFavoriteCrypto(cryptoId))
-  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -87,13 +83,7 @@ export function CryptoList() {
                         {crypto.name} <span className="text-muted-foreground">({crypto.symbol.toUpperCase()})</span>
                       </h3>
                     </Link>
-                    <Button variant="ghost" size="icon" onClick={() => handleToggleFavorite(crypto.id)}>
-                      <Star
-                        className={`h-5 w-5 ${
-                          favoriteCryptos.includes(crypto.id) ? "fill-yellow-400 text-yellow-400" : ""
-                        }`}
-                      />
-                    </Button>
+                    <FavoriteButton id={crypto.id} type="crypto" name={crypto.name} showText={false} />
                   </div>
                   <div className="text-4xl font-bold mb-6">{formatPrice(crypto.price)}</div>
                   <div

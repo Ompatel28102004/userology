@@ -33,6 +33,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         ws.onopen = () => {
           console.log("WebSocket connection established")
           setWsConnected(true)
+          localStorage.setItem("wsConnected", "true")
           setConnectionAttempts(0) // Reset connection attempts on successful connection
 
           // Notify user of successful connection
@@ -87,6 +88,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         ws.onerror = (error) => {
           console.error("WebSocket error:", error)
           setWsConnected(false)
+          localStorage.setItem("wsConnected", "false")
 
           // Only show the error toast on the first few attempts to avoid spamming
           if (connectionAttempts < 2) {
@@ -101,6 +103,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         ws.onclose = (event) => {
           console.log("WebSocket connection closed", event)
           setWsConnected(false)
+          localStorage.setItem("wsConnected", "false")
 
           // Attempt to reconnect with exponential backoff
           const backoffTime = Math.min(30000, 1000 * Math.pow(2, connectionAttempts))
