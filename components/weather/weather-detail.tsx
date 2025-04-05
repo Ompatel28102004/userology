@@ -23,9 +23,17 @@ export function WeatherDetail({ cityId }: WeatherDetailProps) {
   const city = cities.find((c) => c.id === cityId)
 
   useEffect(() => {
-    if (!city) {
-      dispatch(fetchWeatherData())
+    const fetchData = async () => {
+      if (!city) {
+        try {
+          await dispatch(fetchWeatherData()).unwrap()
+        } catch (error) {
+          console.error('Failed to fetch weather data:', error)
+        }
+      }
     }
+
+    fetchData()
   }, [dispatch, city, cityId])
 
   if (loading === "failed") {

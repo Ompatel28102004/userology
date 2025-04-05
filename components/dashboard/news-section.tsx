@@ -6,7 +6,6 @@ import type { AppDispatch, RootState } from "@/redux/store"
 import { fetchNewsData } from "@/redux/features/newsSlice"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatDistanceToNow } from "date-fns"
 
@@ -15,13 +14,23 @@ export function NewsSection() {
   const { articles, loading, error } = useSelector((state: RootState) => state.news)
 
   useEffect(() => {
-    dispatch(fetchNewsData())
+    const fetchNews = async () => {
+      try {
+        await dispatch(fetchNewsData()).unwrap()
+      } catch (err) {
+        console.error('Failed to fetch news:', err)
+      }
+    }
+
+    // Initial fetch
+    fetchNews()
 
     // Set up periodic refresh
     const interval = setInterval(() => {
-      dispatch(fetchNewsData())
+      fetchNews()
     }, 300000) // Refresh every 5 minutes
 
+    // Cleanup interval on unmount
     return () => clearInterval(interval)
   }, [dispatch])
 
@@ -45,11 +54,6 @@ export function NewsSection() {
     <Card className="col-span-1">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Crypto News</CardTitle>
-        <Link href="/news">
-          <Button variant="ghost" size="sm">
-            View All
-          </Button>
-        </Link>
       </CardHeader>
       <CardContent>
         {loading === "pending" ? (

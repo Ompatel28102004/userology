@@ -17,14 +17,31 @@ export function WeatherList() {
   const { cities, loading, error } = useAppSelector((state) => state.weather)
 
   useEffect(() => {
-    dispatch(fetchWeatherData())
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchWeatherData()).unwrap()
+      } catch (err) {
+        console.error('Failed to fetch weather data:', err)
+      }
+    }
+
+    fetchData()
   }, [dispatch])
 
   if (loading === "failed") {
     return (
       <div className="text-center py-8">
         <div className="text-red-500 mb-4">Error loading weather data: {error}</div>
-        <Button variant="outline" onClick={() => dispatch(fetchWeatherData())}>
+        <Button 
+          variant="outline" 
+          onClick={async () => {
+            try {
+              await dispatch(fetchWeatherData()).unwrap()
+            } catch (err) {
+              console.error('Retry failed:', err)
+            }
+          }}
+        >
           Retry
         </Button>
       </div>

@@ -22,75 +22,59 @@ const initialState: NewsState = {
   error: null,
 }
 
-// Mock API call to fetch news data
-export const fetchNewsData = createAsyncThunk("news/fetchNewsData", async () => {
-  try {
-    // In a real app, this would be an API call to NewsData.io or similar
-    // For this demo, we'll return mock data
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate network delay
+// API configuration
+// const RAPID_API_KEY = '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46';
+const RAPID_API_HOST = 'cryptocurrency-news2.p.rapidapi.com';
 
-    return [
-      {
-        id: "news-1",
-        title: "Bitcoin Surges Past $50,000 as Institutional Adoption Grows",
-        url: "#",
-        source: "CryptoNews",
-        publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-      },
-      {
-        id: "news-2",
-        title: "Ethereum 2.0 Upgrade: What You Need to Know About the Merge",
-        url: "#",
-        source: "BlockchainInsider",
-        publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-      },
-      {
-        id: "news-3",
-        title: "Regulatory Clarity: New Crypto Framework Proposed by SEC",
-        url: "#",
-        source: "FinanceDaily",
-        publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
-      },
-      {
-        id: "news-4",
-        title: "DeFi Market Cap Reaches New All-Time High of $150 Billion",
-        url: "#",
-        source: "DeFiPulse",
-        publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
-      },
-      {
-        id: "news-5",
-        title: "NFT Sales Volume Drops 30% in Q2 2023, Analysis Shows",
-        url: "#",
-        source: "NFTWorld",
-        publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(), // 18 hours ago
-      },
-      {
-        id: "news-6",
-        title: "Major Bank Launches Crypto Custody Service for Institutional Clients",
-        url: "#",
-        source: "BankingTech",
-        publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 24 hours ago
-      },
-      {
-        id: "news-7",
-        title: "Solana Ecosystem Growth Accelerates with New Developer Tools",
-        url: "#",
-        source: "CryptoDevs",
-        publishedAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(), // 30 hours ago
-      },
-      {
-        id: "news-8",
-        title: "Central Banks Worldwide Exploring CBDC Options, Survey Finds",
-        url: "#",
-        source: "GlobalFinance",
-        publishedAt: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(), // 36 hours ago
-      },
-    ]
+export const fetchNewsData = createAsyncThunk("news/fetchNewsData", async () => {
+  // Try different endpoint
+  const url = 'https://cryptocurrency-news2.p.rapidapi.com/v1/cointelegraph';
+  const options = {
+    method: 'GET',
+    headers: {
+      'X-RapidAPI-Key': RAPID_API_KEY,
+      'X-RapidAPI-Host': RAPID_API_HOST
+    }
+  };
+
+  try {
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`API Error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    // Check if data exists and has the expected structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid API response format');
+    }
+
+    // Handle different possible response structures
+    const articles = Array.isArray(data.data) ? data.data : 
+                    Array.isArray(data) ? data : [];
+
+    // Map the data with more careful property access
+    return articles.map((article: any, index: number) => ({
+      id: String(index),
+      title: typeof article.title === 'string' ? article.title : 'No title available',
+      url: article.url || article.link || '#',
+      source: 'CoinTelegraph',
+      publishedAt: new Date().toISOString(),
+    }));
+
   } catch (error) {
-    throw new Error("Failed to fetch news data")
+    console.error('Detailed fetch error:', {
+      message: error.message,
+      stack: error.stack,
+    });
+    throw error;
   }
-})
+});
+
 
 // News slice
 const newsSlice = createSlice({

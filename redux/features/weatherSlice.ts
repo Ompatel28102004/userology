@@ -35,116 +35,56 @@ const initialState: WeatherState = {
   error: null,
 }
 
-// Mock API call to fetch weather data
+// const RAPID_API_KEY = '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46';
+const RAPID_API_HOST = 'yahoo-weather5.p.rapidapi.com';
+
+const cities = ['New York', 'London', 'Tokyo', 'Sydney', 'Paris', 'Dubai'];
+
 export const fetchWeatherData = createAsyncThunk("weather/fetchWeatherData", async () => {
   try {
-    // In a real app, this would be an API call to OpenWeatherMap
-    // For this demo, we'll return mock data
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate network delay
+    const weatherPromises = cities.map(async (city) => {
+      const url = `https://yahoo-weather5.p.rapidapi.com/weather?location=${encodeURIComponent(city)}&format=json&u=f`;
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': RAPID_API_KEY,
+          'x-rapidapi-host': RAPID_API_HOST
+        }
+      };
 
-    return [
-      {
-        id: "new-york",
-        name: "New York",
-        country: "US",
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`Weather API error for ${city}: ${response.status}`);
+      }
+      const data = await response.json();
+
+      // Transform Yahoo Weather API data to match our interface
+      return {
+        id: city.toLowerCase().replace(' ', '-'),
+        name: city,
+        country: data.location.country,
         weather: {
-          temp: 22,
-          feelsLike: 23,
-          tempMin: 20,
-          tempMax: 25,
-          pressure: 1012,
-          humidity: 65,
-          windSpeed: 5.2,
-          main: "Clear",
-          description: "Clear sky",
+          temp: ((data.current_observation.condition.temperature - 32) * 5/9).toFixed(1), // Convert F to C
+          feelsLike: ((data.current_observation.wind.chill - 32) * 5/9).toFixed(1),
+          tempMin: ((data.forecasts[0].low - 32) * 5/9).toFixed(1),
+          tempMax: ((data.forecasts[0].high - 32) * 5/9).toFixed(1),
+          pressure: data.current_observation.atmosphere.pressure,
+          humidity: data.current_observation.atmosphere.humidity,
+          windSpeed: (data.current_observation.wind.speed * 1.60934).toFixed(1), // Convert mph to kph
+          main: data.current_observation.condition.text,
+          description: data.current_observation.condition.text,
         },
-      },
-      {
-        id: "london",
-        name: "London",
-        country: "UK",
-        weather: {
-          temp: 18,
-          feelsLike: 17,
-          tempMin: 16,
-          tempMax: 20,
-          pressure: 1008,
-          humidity: 78,
-          windSpeed: 4.1,
-          main: "Clouds",
-          description: "Scattered clouds",
-        },
-      },
-      {
-        id: "tokyo",
-        name: "Tokyo",
-        country: "JP",
-        weather: {
-          temp: 26,
-          feelsLike: 28,
-          tempMin: 24,
-          tempMax: 29,
-          pressure: 1015,
-          humidity: 70,
-          windSpeed: 3.5,
-          main: "Rain",
-          description: "Light rain",
-        },
-      },
-      {
-        id: "sydney",
-        name: "Sydney",
-        country: "AU",
-        weather: {
-          temp: 24,
-          feelsLike: 25,
-          tempMin: 22,
-          tempMax: 27,
-          pressure: 1010,
-          humidity: 60,
-          windSpeed: 6.2,
-          main: "Clear",
-          description: "Clear sky",
-        },
-      },
-      {
-        id: "paris",
-        name: "Paris",
-        country: "FR",
-        weather: {
-          temp: 20,
-          feelsLike: 19,
-          tempMin: 18,
-          tempMax: 22,
-          pressure: 1009,
-          humidity: 72,
-          windSpeed: 3.8,
-          main: "Clouds",
-          description: "Broken clouds",
-        },
-      },
-      {
-        id: "dubai",
-        name: "Dubai",
-        country: "AE",
-        weather: {
-          temp: 36,
-          feelsLike: 40,
-          tempMin: 34,
-          tempMax: 38,
-          pressure: 1005,
-          humidity: 45,
-          windSpeed: 5.5,
-          main: "Clear",
-          description: "Clear sky",
-        },
-      },
-    ]
+      };
+    });
+
+    const results = await Promise.all(weatherPromises);
+    return results;
+
   } catch (error) {
-    throw new Error("Failed to fetch weather data")
+    console.error('Weather API Error:', error);
+    throw new Error("Failed to fetch weather data");
   }
-})
-
+});
 // Weather slice
 const weatherSlice = createSlice({
   name: "weather",

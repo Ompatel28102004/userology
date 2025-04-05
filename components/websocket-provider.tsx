@@ -28,7 +28,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         if (mockDataInterval) clearInterval(mockDataInterval)
 
         // Create new WebSocket connection
-        ws = new WebSocket("wss://ws.coincap.io/prices?assets=bitcoin,ethereum,solana")
+        ws = new WebSocket("wss://ws.coincap.io/prices?assets=bitcoin,ethereum,solana,binance")
 
         ws.onopen = () => {
           console.log("WebSocket connection established")

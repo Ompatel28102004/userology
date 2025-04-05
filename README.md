@@ -27,7 +27,7 @@ A Next.js application that combines cryptocurrency and weather data into a unifi
 1. Clone the repository:
 
 ```bash
-git clone [your-repo-url]
+git clone https://github.com/Ompatel28102004/userology.git
 cd crypto-weather-nexus
 ```
 
