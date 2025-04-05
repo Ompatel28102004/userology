@@ -36,19 +36,20 @@ const initialState: WeatherState = {
 }
 
 const RAPID_API_KEY = '4bef3fa07emshee9d81ec33de101p137349jsne3c78ad159e9';
-const RAPID_API_HOST = 'yahoo-weather5.p.rapidapi.com';
+const RAPID_API_HOST = 'weatherapi-com.p.rapidapi.com';
 
 const cities = ['New York', 'London', 'Tokyo', 'Sydney', 'Paris', 'Dubai'];
 
 export const fetchWeatherData = createAsyncThunk("weather/fetchWeatherData", async () => {
   try {
     const weatherPromises = cities.map(async (city) => {
-      const url = `https://yahoo-weather5.p.rapidapi.com/weather?location=${encodeURIComponent(city)}&format=json&u=f`;
+      const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${encodeURIComponent(city)}`;
       const options = {
         method: 'GET',
         headers: {
           'x-rapidapi-key': RAPID_API_KEY,
-          'x-rapidapi-host': RAPID_API_HOST
+          'x-rapidapi-host': RAPID_API_HOST,
+          'Accept': 'application/json'
         }
       };
 
@@ -58,21 +59,21 @@ export const fetchWeatherData = createAsyncThunk("weather/fetchWeatherData", asy
       }
       const data = await response.json();
 
-      // Transform Yahoo Weather API data to match our interface
+      // Transform WeatherAPI.com data to match our interface
       return {
         id: city.toLowerCase().replace(' ', '-'),
-        name: city,
+        name: data.location.name,
         country: data.location.country,
         weather: {
-          temp: ((data.current_observation.condition.temperature - 32) * 5/9).toFixed(1), // Convert F to C
-          feelsLike: ((data.current_observation.wind.chill - 32) * 5/9).toFixed(1),
-          tempMin: ((data.forecasts[0].low - 32) * 5/9).toFixed(1),
-          tempMax: ((data.forecasts[0].high - 32) * 5/9).toFixed(1),
-          pressure: data.current_observation.atmosphere.pressure,
-          humidity: data.current_observation.atmosphere.humidity,
-          windSpeed: (data.current_observation.wind.speed * 1.60934).toFixed(1), // Convert mph to kph
-          main: data.current_observation.condition.text,
-          description: data.current_observation.condition.text,
+          temp: data.current.temp_c,
+          feelsLike: data.current.feelslike_c,
+          tempMin: data.current.temp_c - 2, // approximation since current-only endpoint
+          tempMax: data.current.temp_c + 2, // approximation since current-only endpoint
+          pressure: data.current.pressure_mb,
+          humidity: data.current.humidity,
+          windSpeed: data.current.wind_kph,
+          main: data.current.condition.text,
+          description: data.current.condition.text,
         },
       };
     });
@@ -85,6 +86,7 @@ export const fetchWeatherData = createAsyncThunk("weather/fetchWeatherData", asy
     throw new Error("Failed to fetch weather data");
   }
 });
+
 // Weather slice
 const weatherSlice = createSlice({
   name: "weather",
