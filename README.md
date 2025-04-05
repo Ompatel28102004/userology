@@ -8,6 +8,10 @@ A Next.js application that combines cryptocurrency and weather data into a unifi
 - Weather forecasts and current conditions
 - Favorite cryptocurrency watchlist
 - Responsive design with modern UI components
+
+## Live Demo
+
+👉 [Try it Live](https://userology-six.vercel.app/)
 ## Tech Stack
 
 - **Framework**: Next.js 14
